@@ -1,0 +1,139 @@
+buildscript {
+  repositories {
+    jcenter()
+
+  }
+
+  dependencies {
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.4'
+    classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
+  }
+}
+
+def rootProject=project
+
+group 'ru.shadam.spring-boot'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+
+
+sourceCompatibility = '1.6'
+targetCompatibility = '1.6'
+
+repositories {
+  jcenter()
+  maven {
+    url 'http://fugru.com/archiva/repository/snapshots'
+  }
+}
+
+project.ext {
+  springBootVersion = '1.3.1.RELEASE'
+  springSocialVersion = '1.1.4.RELEASE'
+  springSocialVkontakteVersion = '1.1.0.BUILD-SNAPSHOT'
+}
+
+dependencies {
+  compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+  compile("org.springframework.social:spring-social-config:$springSocialVersion")
+  compile("org.springframework.social:spring-social-core:$springSocialVersion")
+  compile("org.springframework.social:spring-social-web:$springSocialVersion")
+  compile("org.springframework.social:spring-social-vkontakte:$springSocialVkontakteVersion")
+}
+
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates sources jar') {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, description: 'Creates javadoc jar') {
+  dependsOn 'javadoc'
+}
+
+artifacts {
+  archives sourcesJar, javadocJar
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      pom.withXml {
+        asNode().with {
+//          appendNode('name', rootProject.name)
+//          appendNode('packaging', 'jar')
+          appendNode('description', rootProject.description)
+          appendNode('url', rootProject.project_website)
+          appendNode('scm').with {
+            appendNode('url', rootProject.project_scm)
+            appendNode('connection', rootProject.project_scm)
+            appendNode('developerConnection', rootProject.project_scm)
+          }
+          appendNode('licenses').with {
+            appendNode('license').with {
+              appendNode('name', rootProject.license)
+              appendNode('url', rootProject.license_url)
+              appendNode('distribution', 'repo')
+            }
+          }
+          appendNode('developers').with {
+            appendNode('developer').with {
+              appendNode('id', rootProject.developerId)
+              appendNode('name', rootProject.developerName)
+            }
+          }
+          it
+        }
+      }
+
+      from components.java
+//
+      artifact sourcesJar {
+        classifier 'sources'
+      }
+
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+    }
+  }
+}
+
+project.tasks.build.finalizedBy project.tasks.publishToMavenLocal
+
+
+// oss.jfrog.org artifactory repository
+def bintrayUser = project.hasProperty('bintrayUser') ? project.bintrayUser : ''
+def bintrayKey = project.hasProperty('bintrayKey') ? project.bintrayKey : ''
+
+println "bintrayUser: $bintrayUser, bintrayKey: $bintrayKey"
+
+artifactory {
+  contextUrl = 'https://oss.jfrog.org/artifactory'
+  publish {
+    repository {
+      if (project.version.endsWith('-SNAPSHOT'))
+        repoKey = 'oss-snapshot-local'
+      else
+        repoKey = 'oss-release-local'
+      username = bintrayUser
+      password = bintrayKey
+    }
+    defaults {
+      publications 'mavenJava'
+    }
+  }
+  resolve {
+    repository {
+      repoKey = 'repo'
+    }
+  }
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.10'
+}
+
