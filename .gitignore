@@ -2,3 +2,5 @@
 .idea/
 build/
 *.iml
+# ignored, as it should contain private info about login and pass for bintray
+local.gradle

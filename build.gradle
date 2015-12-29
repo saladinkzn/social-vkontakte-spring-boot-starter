@@ -1,7 +1,6 @@
 buildscript {
   repositories {
     jcenter()
-
   }
 
   dependencies {
@@ -12,13 +11,15 @@ buildscript {
 
 def rootProject=project
 
-group 'ru.shadam.spring-boot'
-version '1.0-SNAPSHOT'
-
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 
+ext {
+  project_website = "https://github.com/${developerId}/${projectId}"
+  project_scm = "scm:git@github.com:${developerId}/${projectId}.git"
+  license_url = "https://raw.github.com/${developerId}/${projectId}/master/LICENSE"
+}
 
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
@@ -104,6 +105,7 @@ publishing {
 project.tasks.build.finalizedBy project.tasks.publishToMavenLocal
 
 
+apply from: 'local.gradle'
 // oss.jfrog.org artifactory repository
 def bintrayUser = project.hasProperty('bintrayUser') ? project.bintrayUser : ''
 def bintrayKey = project.hasProperty('bintrayKey') ? project.bintrayKey : ''
