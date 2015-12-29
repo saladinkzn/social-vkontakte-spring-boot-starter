@@ -104,8 +104,9 @@ publishing {
 
 project.tasks.build.finalizedBy project.tasks.publishToMavenLocal
 
-
-apply from: 'local.gradle'
+if(file('local.gradle').exists()) {
+  apply from: 'local.gradle'
+}
 // oss.jfrog.org artifactory repository
 def bintrayUser = project.hasProperty('bintrayUser') ? project.bintrayUser : ''
 def bintrayKey = project.hasProperty('bintrayKey') ? project.bintrayKey : ''
