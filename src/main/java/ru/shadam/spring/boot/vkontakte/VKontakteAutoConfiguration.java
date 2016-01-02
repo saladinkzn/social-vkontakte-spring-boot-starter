@@ -39,7 +39,7 @@ public class VKontakteAutoConfiguration {
     @EnableSocial
     @EnableConfigurationProperties(VKontakteProperties.class)
     @ConditionalOnWebApplication
-    protected static class TwitterConfigurerAdapter extends SocialConfigurerAdapter {
+    protected static class VKontakteConfigurationAdapter extends SocialConfigurerAdapter {
 
         @Autowired
         private VKontakteProperties properties;
@@ -48,13 +48,11 @@ public class VKontakteAutoConfiguration {
         @ConditionalOnMissingBean
         @Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
         public VKontakte vkontakte(ConnectionRepository repository) {
-            Connection<VKontakte> connection = repository
-                    .findPrimaryConnection(VKontakte.class);
+            Connection<VKontakte> connection = repository.findPrimaryConnection(VKontakte.class);
             if (connection != null) {
                 return connection.getApi();
             }
-            return new VKontakteTemplate(this.properties.getClientId(),
-                    this.properties.getClientSecret());
+            return new VKontakteTemplate(this.properties.getClientId(), this.properties.getClientSecret());
         }
 
         @Bean(name = { "connect/vkontakteConnect", "connect/vkontakteConnected" })
@@ -64,10 +62,8 @@ public class VKontakteAutoConfiguration {
         }
 
         private ConnectionFactory<?> createConnectionFactory() {
-            return new VKontakteConnectionFactory(this.properties.getClientId(),
-                    this.properties.getClientSecret());
+            return new VKontakteConnectionFactory(this.properties.getClientId(), this.properties.getClientSecret());
         }
-
 
         @Override
         public void addConnectionFactories(ConnectionFactoryConfigurer connectionFactoryConfigurer, Environment environment) {

@@ -1,4 +1,7 @@
 # social-vkontakte-spring-boot-starter
+[![Build Status](https://travis-ci.org/saladinkzn/social-vkontakte-spring-boot-starter.svg?branch=master)](https://travis-ci.org/saladinkzn/social-vkontakte-spring-boot-starter)
+[![License](http://img.shields.io/badge/license-MIT-47b31f.svg)](#copyright-and-license)
+
 Spring boot starter for spring social vkontakte
 
 Usage:
