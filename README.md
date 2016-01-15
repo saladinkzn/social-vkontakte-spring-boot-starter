@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    classpath 'ru.shadam.spring-boot:social-vkontakte-spring-boot-starter:0.1'
+    compile 'ru.shadam.spring-boot:social-vkontakte-spring-boot-starter:0.1'
 }
 ```
 

@@ -52,7 +52,7 @@ public class VKontakteAutoConfiguration {
             if (connection != null) {
                 return connection.getApi();
             }
-            return new VKontakteTemplate(this.properties.getClientId(), this.properties.getClientSecret());
+            return new VKontakteTemplate();
         }
 
         @Bean(name = { "connect/vkontakteConnect", "connect/vkontakteConnected" })
