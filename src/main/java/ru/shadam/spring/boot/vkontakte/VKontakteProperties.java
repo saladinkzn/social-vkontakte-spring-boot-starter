@@ -7,7 +7,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "ru.shadam.social-vkontakte")
 public class VKontakteProperties  {
+    /**
+     * clientId for vkontakte application
+     */
     private String clientId;
+    /**
+     * clientSecret for vkontkate application
+     */
     private String clientSecret;
 
     public String getClientId() {
