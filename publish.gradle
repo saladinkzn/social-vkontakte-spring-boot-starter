@@ -83,10 +83,10 @@ if(file('local.gradle').exists()) {
   apply from: 'local.gradle'
 }
 // oss.jfrog.org artifactory repository
-def bintrayUser = System.properties.get('BINTRAY_USER', '')
-def bintrayKey = System.properties.get('BINTRAY_KEY', '')
-def bintrayDryRun = System.properties.get('bintrayDryRun', '')
-def bintrayKeyPhrase = System.properties.get('bintrayKeyPhrase', '')
+def bintrayUser = System.getenv('BINTRAY_USER') ?: ''
+def bintrayKey = System.getenv('BINTRAY_KEY') ?: ''
+def bintrayDryRun = System.getenv('bintrayDryRun') ?: ''
+def bintrayKeyPhrase = System.getenv('bintrayKeyPhrase') ?: ''
 
 artifactory {
   contextUrl = 'https://oss.jfrog.org/artifactory'
