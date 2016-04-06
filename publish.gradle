@@ -85,7 +85,7 @@ if(file('local.gradle').exists()) {
 // oss.jfrog.org artifactory repository
 def bintrayUser = System.getenv('BINTRAY_USER') ?: ''
 def bintrayKey = System.getenv('BINTRAY_KEY') ?: ''
-def bintrayDryRun = System.getenv('bintrayDryRun') ?: ''
+def bintrayDryRun = "true" == (System.getenv('bintrayDryRun') ?: '')
 def bintrayKeyPhrase = System.getenv('bintrayKeyPhrase') ?: ''
 
 artifactory {
@@ -110,20 +110,22 @@ artifactory {
   }
 }
 
-task bintraySign(type: org._10ne.gradle.rest.RestTask) {
-  description 'Push to bintray and sign it.'
-  httpMethod = 'post'
-  uri = "https://api.bintray.com/gpg/${project.developerId}/maven/${project.projectId}/versions/${project.version}"
-  username = bintrayUser
-  password = bintrayKey
-  requestBody = [ passphrase: bintrayKeyPhrase ]
-  contentType = groovyx.net.http.ContentType.JSON
+if(!bintrayDryRun) {
+  task bintraySign(type: org._10ne.gradle.rest.RestTask) {
+    description 'Push to bintray and sign it.'
+    httpMethod = 'post'
+    uri = "https://api.bintray.com/gpg/${project.developerId}/maven/${project.projectId}/versions/${project.version}"
+    username = bintrayUser
+    password = bintrayKey
+    requestBody = [passphrase: bintrayKeyPhrase]
+    contentType = groovyx.net.http.ContentType.JSON
+  }
 }
 
 bintray {
   user = bintrayUser
   key = bintrayKey
-  configurations = ['archives']
+  publications = ['mavenJava']
   pkg {
     repo = 'maven'
     name = "${rootProject.projectId}"
@@ -135,4 +137,5 @@ bintray {
 }
 
 bintrayUpload.dependsOn assemble
-bintrayUpload.finalizedBy project.tasks.bintraySign
+if(!bintrayDryRun)
+  bintrayUpload.finalizedBy project.tasks.bintraySign
