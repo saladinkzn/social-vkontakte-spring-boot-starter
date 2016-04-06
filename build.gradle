@@ -1,11 +1,13 @@
 buildscript {
   repositories {
+    maven { url 'http://repo.spring.io/plugins-release' }
     jcenter()
   }
 
   dependencies {
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.5'
     classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
+    classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
   }
 }
 
@@ -16,15 +18,7 @@ targetCompatibility = '1.6'
 
 repositories {
   jcenter()
-  maven {
-    url 'http://fugru.com/archiva/repository/snapshots'
-  }
-}
-
-project.ext {
-  springBootVersion = '1.3.1.RELEASE'
-  springSocialVersion = '1.1.4.RELEASE'
-  springSocialVkontakteVersion = '1.1.0.BUILD-SNAPSHOT'
+  maven { url 'http://fugru.com/archiva/repository/snapshots' }
 }
 
 dependencies {
@@ -33,7 +27,10 @@ dependencies {
   compile("org.springframework.social:spring-social-core:$springSocialVersion")
   compile("org.springframework.social:spring-social-web:$springSocialVersion")
   compile("org.springframework.social:spring-social-vkontakte:$springSocialVkontakteVersion")
+  optional("org.springframework.boot:spring-boot-configuration-processor:${springBootVersion}")
 }
+
+compileJava.dependsOn(processResources)
 
 apply from: 'publish.gradle'
 

@@ -26,6 +26,8 @@ ru.shadam.social-vkontakte.client-id=//ClientId
 ru.shadam.social-vkontakte.client-secret=//ClientSecret
 ```
 
+This project has [a showcase](https://github.com/saladinkzn/social-vkontakte-spring-boot-starter-showcase) now.
+
 How to build it:
 ------------------------------------------------------
 Checkout the repo then use gradle wrapper script (gradlew or gradlew.bat)
