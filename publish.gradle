@@ -1,0 +1,125 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'com.jfrog.bintray'
+
+ext {
+  project_website = "https://github.com/${developerId}/${projectId}"
+  project_scm = "scm:git@github.com:${developerId}/${projectId}.git"
+  license_url = "https://raw.github.com/${developerId}/${projectId}/master/LICENSE"
+}
+
+
+task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates sources jar') {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, description: 'Creates javadoc jar') {
+  dependsOn 'javadoc'
+}
+
+artifacts {
+  archives sourcesJar, javadocJar
+}
+
+def rootProject = project
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      pom.withXml {
+        asNode().with {
+          appendNode('description', rootProject.description)
+          appendNode('url', rootProject.project_website)
+          appendNode('scm').with {
+            appendNode('url', rootProject.project_scm)
+            appendNode('connection', rootProject.project_scm)
+            appendNode('developerConnection', rootProject.project_scm)
+          }
+          appendNode('licenses').with {
+            appendNode('license').with {
+              appendNode('name', rootProject.license)
+              appendNode('url', rootProject.license_url)
+              appendNode('distribution', 'repo')
+            }
+          }
+          appendNode('developers').with {
+            appendNode('developer').with {
+              appendNode('id', rootProject.developerId)
+              appendNode('name', rootProject.developerName)
+            }
+          }
+          it
+        }
+      }
+
+      from components.java
+//
+      artifact sourcesJar {
+        classifier 'sources'
+      }
+
+      artifact javadocJar {
+        classifier "javadoc"
+      }
+    }
+  }
+}
+
+project.tasks.build.finalizedBy project.tasks.publishToMavenLocal
+
+if(file('local.gradle').exists()) {
+  apply from: 'local.gradle'
+}
+// oss.jfrog.org artifactory repository
+def bintrayUser = System.properties.get('bintrayUser', '')
+def bintrayKey = System.properties.get('bintrayKey', '')
+
+artifactory {
+  contextUrl = 'https://oss.jfrog.org/artifactory'
+  publish {
+    repository {
+      if (project.version.endsWith('-SNAPSHOT'))
+        repoKey = 'oss-snapshot-local'
+      else
+        repoKey = 'oss-release-local'
+      username = bintrayUser
+      password = bintrayKey
+    }
+    defaults {
+      publications 'mavenJava'
+    }
+  }
+  resolve {
+    repository {
+      repoKey = 'repo'
+    }
+  }
+}
+
+bintray {
+  user = project.bintrayUser
+  key = project.bintrayKey
+  configurations = ['archives']
+  pkg {
+    repo = 'maven'
+    name = "${rootProject.projectId}"
+    desc = rootProject.description
+    licenses = [ rootProject.license ]
+    labels = rootProject.projectLabels.split(',')
+  }
+  dryRun = rootProject.bintrayDryRun
+}
+
+bintrayUpload.dependsOn assemble
+bintrayUpload.finalizedBy parent.tasks.bintraySign
+
+import groovyx.net.http.ContentType
+task bintraySign(type: RestTask) {
+  description 'Push to bintray and sign it.'
+  httpMethod = 'post'
+  uri = "https://api.bintray.com/gpg/${project.developerId}/maven/${project.projectId}/versions/${project.version}"
+  username = project.bintrayUser
+  password = project.bintrayKey
+  requestBody = [ passphrase: project.bintrayKeyPhrase ]
+  contentType = ContentType.JSON
+}

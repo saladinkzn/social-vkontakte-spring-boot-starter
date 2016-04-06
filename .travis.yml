@@ -6,3 +6,22 @@ jdk:
 
 before_install:
   - chmod +x gradlew
+
+env:
+  global:
+    - secure: "1PvDWYydWLJrxxfiteHKjWkieZmbLs16oSeSgDRUAT/yZU6N1ivdhZcs6Z8rnPWvJIDvNDlKLcO8u/mcvGrvwbvjjN/tBM7RfXyVxOpLCYOup++qE1lvS/ts12cGc6IZncV5Gv++zUF+f8GQPEM/5NCrb+pZfd2QeXEkOTkhvoItqmpGV6qhxT0u7GcYfApcpx0B2TllVu1zFYCPQUfm60UozjHJUvzIg4Skn7tQW22uNUY4krKLUfJJiTVU2qieuBHDGjajG7d3ZdaDuTlXAPmgWcBuell9Dj2RBqTk2ByQE5a85V+88mAgC4C9fK7gktQIFf5NMzpBLi/bIK7rNA0SAXIcGfTxYSOqU91pTw3cnuh44JzN8r10gW+5VpQpm1ad68wBN7hwbc/H9Fc9ZO/7n28Gco5htDdyPdNvN8D1qZXxoKzmoom/d2FoNK9Oy2dZzdgTptcoPjSnbRtMvqREEXXr6HrLiI0Em+R5Ae0/b75VHJuNktopmUBnF1oDsjT+whuPi4VZdyXbCehSLy73Wb1wFAUsK7HRfoDlMO4o6ikhkyOWXGd61g06W8Fqi9S4tFcIdL4yQuyiyWKh9fCyyh3yENQIDrm8yKFKnOAD66BLeJzlbaU1Olu0nm2RWQvb08gmSMZ34k14vW/QId9zTqeS28nPy9OU4KXw9fI="
+    - secure: "Qhl8jiBT3jb+Fpe+kAhFZGctEPCNdwR3zDsroJOY+RaxW9BaSPXaM5XcqAWnIAtIxNhFw2TaWGbh+QKqcHGzD+Ay6R/2Q8xEYR6NMWuVlOlSC03Xa89z1zf6AfpfMh/aa+iVrI5HvV97KzX5U++xEgSRNW/cdhMkEKq12pgWYzwTKyiio++rLVH3YjvBY7q7WA46DJqils6+5GnHYuKeM/VW9LD0L7BSdLpZ2VtUtl6VDAJrubOLgl0iKTkKDvqwtDTjaep26yswY4gf+Wr4r/XhcRCeyNTktl85CoHb1efJ92mm3lEt0zOIliJqbPRKmU1oYJHLi22E3y0xgbEFEfcMxejIMi9mxf7JudRE0z6AtAq2VAvJm+KnVVhoC7pETmoU4CAH9vtjqpX0JHcETrcagTjD3HCRcO7gSUE05NkVpHmEp7Dok+HacZN44yuVfcErwAQ3ehI5ou8uGbkRVG/ZW6WtR2y1AK7SHlxekjyY3rjL18ZgNgFAeSHf1QGXysPLV7sCSkdw+xxFpXiq8W8YtqpEIu0mYptSz6J0TQADKAbGaRP+GGzobfspqbV173C6u0uBM4UmI/49yepobFzaQrqlEZoXT6Xcf6SzZYPMuZeGJkzUeYPkV0jLEN7I4HEqJQF8SElw88Zer1K7ShP0IlcnrlEAh5Gf6KTHOec="
+
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./gradlew artifactoryPublish
+    on:
+      branch: master
+      jdk: oraclejdk8
+  - provider: script
+    skip_cleanup: true
+    script: ./gradlew bintrayUpload
+    on:
+      tags: true
+      jdk: oraclejdk8

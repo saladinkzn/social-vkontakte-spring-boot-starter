@@ -9,17 +9,7 @@ buildscript {
   }
 }
 
-def rootProject=project
-
 apply plugin: 'java'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.artifactory'
-
-ext {
-  project_website = "https://github.com/${developerId}/${projectId}"
-  project_scm = "scm:git@github.com:${developerId}/${projectId}.git"
-  license_url = "https://raw.github.com/${developerId}/${projectId}/master/LICENSE"
-}
 
 sourceCompatibility = '1.6'
 targetCompatibility = '1.6'
@@ -45,96 +35,7 @@ dependencies {
   compile("org.springframework.social:spring-social-vkontakte:$springSocialVkontakteVersion")
 }
 
-task sourcesJar(type: Jar, dependsOn: classes, description: 'Creates sources jar') {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, description: 'Creates javadoc jar') {
-  dependsOn 'javadoc'
-}
-
-artifacts {
-  archives sourcesJar, javadocJar
-}
-
-publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      pom.withXml {
-        asNode().with {
-//          appendNode('name', rootProject.name)
-//          appendNode('packaging', 'jar')
-          appendNode('description', rootProject.description)
-          appendNode('url', rootProject.project_website)
-          appendNode('scm').with {
-            appendNode('url', rootProject.project_scm)
-            appendNode('connection', rootProject.project_scm)
-            appendNode('developerConnection', rootProject.project_scm)
-          }
-          appendNode('licenses').with {
-            appendNode('license').with {
-              appendNode('name', rootProject.license)
-              appendNode('url', rootProject.license_url)
-              appendNode('distribution', 'repo')
-            }
-          }
-          appendNode('developers').with {
-            appendNode('developer').with {
-              appendNode('id', rootProject.developerId)
-              appendNode('name', rootProject.developerName)
-            }
-          }
-          it
-        }
-      }
-
-      from components.java
-//
-      artifact sourcesJar {
-        classifier 'sources'
-      }
-
-      artifact javadocJar {
-        classifier "javadoc"
-      }
-    }
-  }
-}
-
-project.tasks.build.finalizedBy project.tasks.publishToMavenLocal
-
-if(file('local.gradle').exists()) {
-  apply from: 'local.gradle'
-}
-// oss.jfrog.org artifactory repository
-def bintrayUser = project.hasProperty('bintrayUser') ? project.bintrayUser : ''
-def bintrayKey = project.hasProperty('bintrayKey') ? project.bintrayKey : ''
-
-println "bintrayUser: $bintrayUser, bintrayKey: $bintrayKey"
-
-artifactory {
-  contextUrl = 'https://oss.jfrog.org/artifactory'
-  publish {
-    repository {
-      if (project.version.endsWith('-SNAPSHOT'))
-        repoKey = 'oss-snapshot-local'
-      else
-        repoKey = 'oss-release-local'
-      username = bintrayUser
-      password = bintrayKey
-    }
-    defaults {
-      publications 'mavenJava'
-    }
-  }
-  resolve {
-    repository {
-      repoKey = 'repo'
-    }
-  }
-}
-
+apply from: 'publish.gradle'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.10'
