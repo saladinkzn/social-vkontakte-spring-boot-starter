@@ -1,3 +1,15 @@
+buildscript {
+  repositories {
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+
+  dependencies {
+    classpath "org._10ne.gradle:rest-gradle-plugin:0.4.1"
+    classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+  }
+
+}
+
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'com.jfrog.bintray'
@@ -73,6 +85,8 @@ if(file('local.gradle').exists()) {
 // oss.jfrog.org artifactory repository
 def bintrayUser = System.properties.get('bintrayUser', '')
 def bintrayKey = System.properties.get('bintrayKey', '')
+def bintrayDryRun = System.properties.get('bintrayDryRun', '')
+def bintrayKeyPhrase = System.properties.get('bintrayKeyPhrase', '')
 
 artifactory {
   contextUrl = 'https://oss.jfrog.org/artifactory'
@@ -96,9 +110,19 @@ artifactory {
   }
 }
 
+task bintraySign(type: org._10ne.gradle.rest.RestTask) {
+  description 'Push to bintray and sign it.'
+  httpMethod = 'post'
+  uri = "https://api.bintray.com/gpg/${project.developerId}/maven/${project.projectId}/versions/${project.version}"
+  username = bintrayUser
+  password = bintrayKey
+  requestBody = [ passphrase: bintrayKeyPhrase ]
+  contentType = groovyx.net.http.ContentType.JSON
+}
+
 bintray {
-  user = project.bintrayUser
-  key = project.bintrayKey
+  user = bintrayUser
+  key = bintrayKey
   configurations = ['archives']
   pkg {
     repo = 'maven'
@@ -107,19 +131,8 @@ bintray {
     licenses = [ rootProject.license ]
     labels = rootProject.projectLabels.split(',')
   }
-  dryRun = rootProject.bintrayDryRun
+  dryRun = bintrayDryRun
 }
 
 bintrayUpload.dependsOn assemble
-bintrayUpload.finalizedBy parent.tasks.bintraySign
-
-import groovyx.net.http.ContentType
-task bintraySign(type: RestTask) {
-  description 'Push to bintray and sign it.'
-  httpMethod = 'post'
-  uri = "https://api.bintray.com/gpg/${project.developerId}/maven/${project.projectId}/versions/${project.version}"
-  username = project.bintrayUser
-  password = project.bintrayKey
-  requestBody = [ passphrase: project.bintrayKeyPhrase ]
-  contentType = ContentType.JSON
-}
+bintrayUpload.finalizedBy project.tasks.bintraySign
